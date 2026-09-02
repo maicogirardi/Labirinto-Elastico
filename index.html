@@ -3,11 +3,27 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<meta http-equiv="refresh" content="0; url=./v2/" />
-	<title>Labirinto Elástico</title>
+	<title>Labirinto</title>
+	<link rel="stylesheet" href="./landing.css" />
 </head>
 <body>
-	<p>Abrindo <a href="./v2/">Labirinto Elástico V2</a>...</p>
-	<script>window.location.replace('./v2/');</script>
+	<main class="landing">
+		<div class="hero-image" aria-hidden="true"></div>
+		<div class="hero-content">
+			<p class="eyebrow">Escolha sua experiência</p>
+			<h1>Labirinto</h1>
+			<p class="intro">Encontre a saída e decida como quer percorrer o caminho.</p>
+			<nav class="versions" aria-label="Escolha de versão">
+				<a class="version-card linear" href="./v1/index.html">
+					<strong>Labirinto Linear</strong>
+					<span>Trace o caminho pelos corredores</span>
+				</a>
+				<a class="version-card elastic" href="./v2/index.html">
+					<strong>Labirinto Elástico</strong>
+					<span>Conduza o fio sem atravessar paredes</span>
+				</a>
+			</nav>
+		</div>
+	</main>
 </body>
 </html>

@@ -96,9 +96,24 @@ canvas {
 	gap: 10px;
 }
 
-.version-link {
+.bottom-links {
 	grid-row: 5;
 	align-self: end;
+	display: grid;
+	justify-items: center;
+	gap: 10px;
+}
+
+.home-link {
+	border-color: #76ecff;
+	background: rgb(10 24 43 / .9);
+	box-shadow: 0 0 16px rgb(67 221 255 / .15);
+}
+
+.home-link:hover {
+	border-color: #b5f8ff;
+	background: rgb(14 39 64 / .96);
+	box-shadow: 0 0 24px rgb(67 221 255 / .36);
 }
 
 button,
@@ -131,8 +146,9 @@ a:hover {
 		justify-content: space-between;
 	}
 
-	.version-link {
+	.bottom-links {
 		align-self: auto;
+		display: flex;
 	}
 }
 
