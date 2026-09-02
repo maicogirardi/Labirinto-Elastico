@@ -9,13 +9,21 @@
 	<body>
 	<main class="game">
 		<h1 class="title">Labirinto Elástico V2</h1>
-		<canvas id="maze" aria-label="Labirinto de linha elástica"></canvas>
-		<p id="message" class="message" aria-live="polite">Clique no ponto verde e arraste. A linha não atravessa paredes.</p>
-		<div class="controls">
-			<button id="new-maze" type="button">Novo labirinto</button>
-			<button id="restart" type="button">Recomeçar</button>
-			<a href="../v1/">Abrir V1</a>
+		<div class="play-area">
+			<canvas id="maze" aria-label="Labirinto de linha elástica"></canvas>
+			<aside class="sidebar" aria-label="Informações e controles">
+				<div class="distance">
+					<span>Distância percorrida</span>
+					<output id="distance-value">0 mm</output>
+				</div>
+				<div class="controls">
+					<button id="new-maze" type="button">Novo jogo</button>
+					<button id="restart" type="button">Recomeçar</button>
+				</div>
+				<a class="version-link" href="../v1/index.html">Abrir V1</a>
+			</aside>
 		</div>
+		<p id="message" class="message" aria-live="polite">Clique no ponto verde e arraste. A linha não atravessa paredes.</p>
 	</main>
 	<script src="./script.js"></script>
 </body>

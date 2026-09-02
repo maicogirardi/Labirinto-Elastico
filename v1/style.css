@@ -18,20 +18,30 @@ body {
 }
 
 .game {
-	width: min(100%, 760px);
+	width: min(100%, 1040px);
 	display: grid;
 	justify-items: center;
 	gap: 10px;
 }
 
 .title {
+	width: min(100%, 720px);
+	justify-self: start;
 	margin: 0;
-	font-size: 1.2rem;
+	font-size: 1.6rem;
 	line-height: 1.1;
 }
 
+.play-area {
+	width: 100%;
+	display: grid;
+	grid-template-columns: minmax(0, 720px) minmax(210px, 1fr);
+	align-items: stretch;
+	gap: 28px;
+}
+
 canvas {
-	width: min(100%, 720px);
+	width: 100%;
 	aspect-ratio: 1;
 	display: block;
 	background: #131722;
@@ -41,7 +51,37 @@ canvas {
 	cursor: crosshair;
 }
 
+.sidebar {
+	display: grid;
+	grid-template-rows: 3fr auto auto 1fr auto;
+	justify-items: center;
+	gap: 26px;
+	padding: 18px;
+	border: 1px solid #2b3343;
+	border-radius: 6px;
+	background: #10131b;
+}
+
+.distance {
+	grid-row: 1;
+	align-self: end;
+	display: grid;
+	justify-items: center;
+	gap: 6px;
+	color: #abb6ca;
+	font-size: 1.2rem;
+	text-align: center;
+}
+
+.distance output {
+	color: #f6c453;
+	font-size: 2.8rem;
+	font-weight: 700;
+}
+
 .message {
+	width: min(100%, 720px);
+	justify-self: start;
 	margin: 0;
 	min-height: 24px;
 	color: #abb6ca;
@@ -49,21 +89,20 @@ canvas {
 }
 
 .controls {
+	grid-row: 2;
+	width: max-content;
 	display: flex;
+	flex-wrap: nowrap;
 	gap: 10px;
 }
 
-button {
-	border: 1px solid #38445a;
-	border-radius: 8px;
-	background: #1b2230;
-	color: inherit;
-	font: inherit;
-	padding: 10px 14px;
-	cursor: pointer;
+.version-link {
+	grid-row: 5;
+	align-self: end;
 }
 
-.button-link {
+button,
+a {
 	border: 1px solid #38445a;
 	border-radius: 8px;
 	background: #1b2230;
@@ -71,9 +110,38 @@ button {
 	font: inherit;
 	padding: 10px 14px;
 	text-decoration: none;
+	cursor: pointer;
 }
 
 button:hover,
-.button-link:hover {
+a:hover {
 	background: #263149;
+}
+
+@media (max-width: 980px) {
+	.play-area {
+		grid-template-columns: minmax(0, 720px);
+		justify-content: center;
+	}
+
+	.sidebar {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.version-link {
+		align-self: auto;
+	}
+}
+
+@media (max-width: 560px) {
+	body {
+		padding: 16px;
+	}
+
+	.sidebar {
+		flex-direction: column;
+	}
 }

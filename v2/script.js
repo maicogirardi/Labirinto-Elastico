@@ -1,6 +1,7 @@
 const canvas = document.querySelector('#maze');
 const context = canvas.getContext('2d');
 const message = document.querySelector('#message');
+const distanceValue = document.querySelector('#distance-value');
 const newMazeButton = document.querySelector('#new-maze');
 const restartButton = document.querySelector('#restart');
 
@@ -219,6 +220,12 @@ function getPathLength() {
 	}, 0);
 }
 
+function updateDistance(metrics) {
+	const millimetersPerGrid = 10;
+	const distanceInMillimeters = Math.round(getPathLength() / metrics.cellSize * millimetersPerGrid);
+	distanceValue.textContent = `${distanceInMillimeters} mm`;
+}
+
 function getPathPointAtDistance(distance) {
 	let remainingDistance = Math.max(0, distance);
 	for (let index = 1; index < ropePath.length; index++) {
@@ -413,6 +420,7 @@ function segmentHitsMazeWall(startPoint, endPoint, cellSize) {
 
 function draw(metrics) {
 	const { size, cellSize, ropeRadius } = metrics || getMetrics();
+	updateDistance({ cellSize });
 	context.clearRect(0, 0, size, size);
 	context.fillStyle = '#131722';
 	context.fillRect(0, 0, size, size);

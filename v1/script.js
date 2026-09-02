@@ -1,6 +1,7 @@
 const canvas = document.querySelector('#maze');
 const context = canvas.getContext('2d');
 const message = document.querySelector('#message');
+const distanceValue = document.querySelector('#distance-value');
 const newMazeButton = document.querySelector('#new-maze');
 const restartButton = document.querySelector('#restart');
 
@@ -19,6 +20,10 @@ let cells = [];
 let path = [];
 let tracing = false;
 let completed = false;
+let retracting = false;
+let visiblePathSegments = 0;
+let retractionFrame = null;
+let lastRetractionTime = 0;
 
 function createCell(x, y) {
 	return {
@@ -67,6 +72,10 @@ function restart() {
 	path = [];
 	tracing = false;
 	completed = false;
+	retracting = false;
+	visiblePathSegments = 0;
+	if (retractionFrame) cancelAnimationFrame(retractionFrame);
+	retractionFrame = null;
 	message.textContent = 'Clique no ponto verde e mantenha o mouse pressionado para traçar o caminho.';
 	draw();
 }
@@ -80,8 +89,10 @@ function metrics() {
 	return { size, cellSize: size / columns };
 }
 
-function draw() {
-	const { size, cellSize } = metrics();
+function draw(currentMetrics = metrics()) {
+	const { size, cellSize } = currentMetrics;
+	const millimetersPerGrid = 10;
+	distanceValue.textContent = `${Math.round(Math.max(0, visiblePathSegments) * millimetersPerGrid)} mm`;
 	context.clearRect(0, 0, size, size);
 
 	context.strokeStyle = '#e2e8f0';
@@ -106,12 +117,25 @@ function draw() {
 		context.lineWidth = Math.max(5, cellSize * 0.27);
 		context.lineJoin = 'round';
 		context.beginPath();
-		path.forEach((cell, index) => {
+		const drawnSegments = Math.min(visiblePathSegments, Math.max(0, path.length - 1));
+		for (let index = 0; index < path.length; index++) {
+			const cell = path[index];
 			const x = (cell.x + .5) * cellSize;
 			const y = (cell.y + .5) * cellSize;
-			if (index === 0) context.moveTo(x, y);
-			else context.lineTo(x, y);
-		});
+			if (index === 0) {
+				context.moveTo(x, y);
+				continue;
+			}
+			if (drawnSegments >= index) context.lineTo(x, y);
+			else {
+				const previousCell = path[index - 1];
+				const previousX = (previousCell.x + .5) * cellSize;
+				const previousY = (previousCell.y + .5) * cellSize;
+				const ratio = Math.max(0, drawnSegments - (index - 1));
+				context.lineTo(previousX + (x - previousX) * ratio, previousY + (y - previousY) * ratio);
+				break;
+			}
+		}
 		context.stroke();
 	}
 }
@@ -140,12 +164,14 @@ function addCell(cell) {
 	if (cell === previous) return;
 	if (path.length > 1 && cell === path[path.length - 2]) {
 		path.pop();
+		visiblePathSegments = Math.min(visiblePathSegments, Math.max(0, path.length - 1));
 		draw();
 		return;
 	}
 	if (!canMove(previous, cell) || path.includes(cell)) return;
 
 	path.push(cell);
+	visiblePathSegments = path.length - 1;
 	if (cell.x === end.x && cell.y === end.y) {
 		completed = true;
 		tracing = false;
@@ -154,12 +180,41 @@ function addCell(cell) {
 	draw();
 }
 
+function retractPath(now) {
+	if (!retracting) return;
+	const delta = Math.min((now - lastRetractionTime) / 1000, .035);
+	lastRetractionTime = now;
+	const currentMetrics = metrics();
+	visiblePathSegments = Math.max(0, visiblePathSegments - delta * 2000 / currentMetrics.cellSize);
+
+	if (visiblePathSegments === 0) {
+		path = [];
+		retracting = false;
+		retractionFrame = null;
+	}
+
+	draw(currentMetrics);
+	if (retracting) retractionFrame = requestAnimationFrame(retractPath);
+}
+
+function releasePath() {
+	tracing = false;
+	if (completed || retracting) return;
+	retracting = true;
+	lastRetractionTime = performance.now();
+	retractionFrame = requestAnimationFrame(retractPath);
+}
+
 canvas.addEventListener('pointerdown', event => {
 	if (completed) return;
 	const cell = cellFromEvent(event);
 	if (cell?.x !== start.x || cell?.y !== start.y) return;
 	path = [cell];
 	tracing = true;
+	retracting = false;
+	visiblePathSegments = 0;
+	if (retractionFrame) cancelAnimationFrame(retractionFrame);
+	retractionFrame = null;
 	canvas.setPointerCapture(event.pointerId);
 	draw();
 });
@@ -168,9 +223,9 @@ canvas.addEventListener('pointermove', event => {
 	if (tracing && !completed) addCell(cellFromEvent(event));
 });
 
-canvas.addEventListener('pointerup', () => { tracing = false; });
+canvas.addEventListener('pointerup', releasePath);
 
-canvas.addEventListener('pointercancel', () => { tracing = false; });
+canvas.addEventListener('pointercancel', releasePath);
 
 newMazeButton.addEventListener('click', createMaze);
 restartButton.addEventListener('click', restart);
