@@ -517,7 +517,8 @@ function processRopePointer(rawPointer, metrics) {
 		traversedCellKeys.add(nextCellKey);
 		targetRopeLength = getPathLength();
 	} else {
-		pointer = keepPointerMovingForward(safePointer);
+		const forwardPointer = keepPointerMovingForward(safePointer);
+		pointer = sweepInsideMaze(pointer, forwardPointer, metrics.cellSize, metrics.ropeRadius);
 	}
 	const finish = centerOf(end, metrics.cellSize);
 	if (Math.hypot(pointer.x - finish.x, pointer.y - finish.y) < metrics.cellSize * .23) {
