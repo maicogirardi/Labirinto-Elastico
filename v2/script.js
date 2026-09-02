@@ -261,7 +261,7 @@ function getVisiblePath() {
 
 function updateElasticRope(delta) {
 	const pathLength = getPathLength();
-	if (retracting) targetRopeLength = Math.max(0, targetRopeLength - delta * 360);
+	if (retracting) targetRopeLength = Math.max(0, targetRopeLength - delta * 1200);
 	const springForce = (targetRopeLength - visibleRopeLength) * 240;
 	ropeVelocity = (ropeVelocity + springForce * delta) * Math.pow(.012, delta);
 	visibleRopeLength = Math.max(0, Math.min(pathLength, visibleRopeLength + ropeVelocity * delta));
@@ -488,10 +488,27 @@ canvas.addEventListener('pointerdown', event => {
 	canvas.setPointerCapture(event.pointerId);
 });
 
-function updateRopePointer(event) {
-	if (!dragging || completed || event.pointerId !== activePointerId) return;
-	const metrics = getMetrics();
-	const rawPointer = positionFromEvent(event);
+function keepPointerMovingForward(position) {
+	if (ropePath.length < 2) return position;
+	const previousPoint = ropePath[ropePath.length - 2];
+	const lastPoint = ropePath[ropePath.length - 1];
+	const directionX = lastPoint.x - previousPoint.x;
+	const directionY = lastPoint.y - previousPoint.y;
+	const directionLength = Math.hypot(directionX, directionY);
+	if (directionLength < .01) return position;
+
+	const normalizedX = directionX / directionLength;
+	const normalizedY = directionY / directionLength;
+	const progress = (position.x - lastPoint.x) * normalizedX + (position.y - lastPoint.y) * normalizedY;
+	if (progress >= 0) return position;
+
+	return {
+		x: position.x - normalizedX * progress,
+		y: position.y - normalizedY * progress
+	};
+}
+
+function processRopePointer(rawPointer, metrics) {
 	const safePointer = sweepInsideMaze(pointer, rawPointer, metrics.cellSize, metrics.ropeRadius);
 	const nextCellKey = getCellKeyFromPosition(safePointer, metrics.cellSize);
 	if (nextCellKey !== committedCellKey && !traversedCellKeys.has(nextCellKey)) {
@@ -500,13 +517,24 @@ function updateRopePointer(event) {
 		traversedCellKeys.add(nextCellKey);
 		targetRopeLength = getPathLength();
 	} else {
-		pointer = safePointer;
+		pointer = keepPointerMovingForward(safePointer);
 	}
 	const finish = centerOf(end, metrics.cellSize);
 	if (Math.hypot(pointer.x - finish.x, pointer.y - finish.y) < metrics.cellSize * .23) {
 		completed = true;
 		dragging = false;
 		message.textContent = 'Labirinto concluído!';
+	}
+}
+
+function updateRopePointer(event) {
+	if (!dragging || completed || event.pointerId !== activePointerId) return;
+	const metrics = getMetrics();
+	const coalescedEvents = event.getCoalescedEvents?.() || [];
+	const samples = coalescedEvents.length ? coalescedEvents : [event];
+	for (const sample of samples) {
+		processRopePointer(positionFromEvent(sample), metrics);
+		if (!dragging || completed) break;
 	}
 
 }
