@@ -261,7 +261,7 @@ function getVisiblePath() {
 
 function updateElasticRope(delta) {
 	const pathLength = getPathLength();
-	if (retracting) targetRopeLength = Math.max(0, targetRopeLength - delta * 1200);
+	if (retracting) targetRopeLength = Math.max(0, targetRopeLength - delta * 2000);
 	const springForce = (targetRopeLength - visibleRopeLength) * 240;
 	ropeVelocity = (ropeVelocity + springForce * delta) * Math.pow(.012, delta);
 	visibleRopeLength = Math.max(0, Math.min(pathLength, visibleRopeLength + ropeVelocity * delta));
