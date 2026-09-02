@@ -157,7 +157,7 @@ function keepInsideCell(position, cell, cellSize, clearance) {
 }
 
 function sweepInsideMaze(from, to, cellSize, radius) {
-	const clearance = radius + cellSize * .055;
+	const clearance = radius + cellSize * .12;
 	const distance = Math.hypot(to.x - from.x, to.y - from.y);
 	const stepCount = Math.max(1, Math.ceil(distance / Math.max(1, radius * .25)));
 	const stepX = (to.x - from.x) / stepCount;
